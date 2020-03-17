@@ -23,6 +23,9 @@ Sending to All Users
   socket.broadcast.to(socketid).emit('chat-data',username+':'+data)
   io.sockets.connected[socket.id].emit('login-success',true)
  */
+let userMap = new Map();
+let room1 = "public";
+let room2 = "private";
 let io = require("socket.io").listen(server); //socket.io-liveChatRender
 io.sockets.on("connection", socket => {
   socket.on("login", data => {
@@ -30,12 +33,23 @@ io.sockets.on("connection", socket => {
     // io.emit('login-success',`From Server ${data}`)
     //io.emit("login-success", true)
     socket.username = data;
-    io.sockets.connected[socket.id].emit("login-success", true); //according to socket id
+    //.sockets.connected[socket.id].emit("login-success", true); //according to socket id
+    userMap.set(socket.username, socket.id);
+    if (socket.username == "w" || socket.username == "x") {
+      socket.join(room1);
+      socket.userroom = room1;
+    } else {
+      socket.join(room2);
+      socket.userroom = room2;
+    }
+    socket.emit("login-success", true);
   });
   socket.on("msg", data =>
     //console.log(data);
     // io.emit("income-msg", data)
-    io.emit("income-msg", `${socket.username} : ${data}`)
+    //io.emit("income-msg", `${socket.username} : ${data}`)
+    // io.in("public").emit("income-msg", `${socket.username} : ${data}`)
+    io.in(socket.userroom).emit("income-msg", `${socket.username} : ${data}`)
   );
 });
 
