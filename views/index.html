@@ -71,9 +71,11 @@
         <button id="send">Send</button>
       </div>
     </div>
+    <button id="gameBtn">Game Btn</button>
+    <button id="bookBtn">Book Btn</button>
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
-      let socket = io();
       let loginHolder = document.querySelector(".loginHolder");
       let chatHolder = document.querySelector(".chatHolder");
       let name = document.querySelector("#name");
@@ -81,18 +83,24 @@
       let message = document.querySelector("#message");
       let send = document.querySelector("#send");
       let chatMsg = document.querySelector(".chatMsg");
+      let gameBtn = document.querySelector("#gameBtn");
+      let bookBtn = document.querySelector("#bookBtn");
+
+      let socket = io.connect();
       login.addEventListener("click", loginNow);
       function loginNow() {
         //alert(name.value);
         socket.emit("login", name.value);
         name.value = "";
       }
+
       send.addEventListener("click", sendMsg);
       function sendMsg() {
         //alert(message.value);
         socket.emit("msg", message.value);
         message.value = "";
       }
+
       socket.on("login-success", data => {
         // console.log(data)
         if (data) {
@@ -100,11 +108,27 @@
           chatHolder.classList.remove("hide");
         }
       });
+
       socket.on("income-msg", msg => {
         console.log(msg);
         let data = chatMsg.innerText;
         chatMsg.innerText = data + "\n" + msg;
       });
+
+      //namespace start
+      let gameSocket = io("/game");
+      gameBtn.addEventListener("click", gameStartNow);
+      function gameStartNow() {
+        //alert(123);
+        gameSocket.emit("gamestart", "Game Socket is running!");
+      }
+      let bookSocket = io("/book");
+      bookBtn.addEventListener("click", bookStartNow);
+      function bookStartNow() {
+        //alert(1234);
+        bookSocket.emit("bookstart", "Book Socket is running!");
+      }
+      //namespce end
     </script>
   </body>
 </html>
